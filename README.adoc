@@ -1,0 +1,32 @@
+= Sameness
+
+A library created for the sole purpose of determining if the method you refactored is still the same as the method you refactored it from.
+
+== Usage
+
+[source,java]
+----
+@Property
+public void testGetStartOfDay(
+		Date date
+) throws Exception {
+	checker.check("getStartOfDay", newArrayList(
+			arg(date)
+	), Date.class);
+}
+----
+
+[source,java]
+----
+@property
+public void testGetStartOfDay(
+		Date date
+) throws Exception {
+	checker.check("getStartOfDay", newArrayList(
+			arg(date, Date.class)
+	), simpleEquatator(Date.class));
+}
+----
+
+etc.
+

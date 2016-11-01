@@ -1,5 +1,7 @@
 = Sameness
 
+image:https://travis-ci.org/aetheric/sameness.svg?branch=master["Build Status", link="https://travis-ci.org/aetheric/sameness"]
+
 A library created for the sole purpose of determining if the method you refactored is still the same as the method you refactored it from.
 
 == Usage

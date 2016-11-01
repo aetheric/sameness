@@ -11,11 +11,8 @@ env:
 before_install:
   - chmod +x ./bin/ci-precheck.sh && ./bin/ci-precheck.sh
 
-install:
-  - mvn dependency:tree
-
-script:
-  - mvn package
+before_deploy:
+  - cp pom.xml target/sameness-${PROJECT_VERSION}.pom
 
 deploy:
 
@@ -30,7 +27,7 @@ deploy:
     skip_cleanup: true
     overwrite: true
     file:
-      - pom.xml
+      - target/sameness-${PROJECT_VERSION}.pom
       - target/sameness-${PROJECT_VERSION}.jar
       - target/sameness-${PROJECT_VERSION}-sources.jar
     api_key:

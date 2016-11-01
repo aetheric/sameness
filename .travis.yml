@@ -1,1 +1,37 @@
-language: java
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+    - //
+    - //
+
+before_install:
+  - docker pull maven:3.3.9-jdk-8-alpine
+
+script:
+  - chmod +x ./build.sh
+  - ./build.sh
+
+before_deploy:
+  - chmod +x ./deploy.sh
+
+deploy:
+
+  - provider: script
+    script: deploy.sh
+    skip_cleanup: true
+    on:
+      branch: master
+
+  - provider: releases
+    api_key: //
+    skip_cleanup: true
+    file:
+      - target/sameness.jar
+      - target/sameness.src.jar
+    overwrite: true
+    on:
+      tags: true

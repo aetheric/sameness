@@ -1,7 +1,7 @@
-sudo: required
+language: java
 
-services:
-  - docker
+jdk:
+  - oraclejdk8
 
 env:
   global:
@@ -9,29 +9,31 @@ env:
     - secure: Tvo2A3s9J39OxaepGcgQvhVwd6E8uYjpCT6yIGy89pVCgh5fRX2X4M9NknZ2iC4f32QuDFVqlHXVvDAF+4IFbvAyvxKjdXdzrdL4aAw1mYbMhXb1jmr2xjeXVjDXXjHbtR81Zb4rzgFL5p4Yn276tmZzjGHjDQ/qnpbSy8lTsg9yDIILkZMJIg/2mlWya7mFmUtXtzowlZRjrgxW+oIXzNSvQzPONCmxQCZFLWzWGflWuJpswN8ce5vcjxmKw5BAPxuo+vUEyIjVvz0B75BjgMIfU0f4ymup1EptH40K9EENpq38AAWP0O4NWV1OqikhO8Ak118SnI2yS+3KEGdFjt5RmMD5NfHQwH7xrM+UXKOxRKmqTnee05mVtqJbOGNP8Cc8K1NFFeyfoHszdmGDqAWYabkHlyTqBpIi0tEEZr8JQ/8GmFdGOMX2ulmwuw1QFXCa68A8BwG12aLSum63RnhFNbS3ZVvT5VwnWiID3JII8vjaouVCWaWbZ3Xqb6TJmHKD4htxoaCCtzc1bZjFJqoWy10Iz5jEk6CYO/6ptZ4FsLnuWcaT0FrLydK0yFvwEyFW6APgl9osuvx3ugOnTG+pU2RmDRsmBJbnNSFQH6xx0W5LApFnOOdvWX9ku1iNl9xcpwMzMreR1dI7mTDFVK/tYIMEKcZETBV/TvVntK4=
 
 before_install:
-  - docker pull maven:3.3.9-jdk-8-alpine
+  - PROJECT_VERSION="$(mvn -o help:evaluate -Dexpression=project.version | grep -v '\[')"
+  - if [ -n "${TRAVIS_TAG}" ] && [ "${TRAVIS_TAG}" != "${PROJECT_VERSION}" ]; then exit 1; fi
+
+install:
+  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 script:
-  - chmod +x ./build.sh
-  - ./build.sh
-
-before_deploy:
-  - chmod +x ./deploy.sh
+  - mvn package
 
 deploy:
 
   - provider: script
-    script: deploy.sh
+    script: mvn deploy --settings settings.xml
     skip_cleanup: true
     on:
+      repo: aetheric/sameness
       branch: master
 
   - provider: releases
     skip_cleanup: true
     overwrite: true
     file:
-      - target/sameness.jar
-      - target/sameness-src.jar
+      - pom.xml
+      - target/sameness-${PROJECT_VERSION}.jar
+      - target/sameness-${PROJECT_VERSION}-sources.jar
     api_key:
       secure: Jqe/fLQaZxwXBSk7XQhOVIQeA7T20kp8qU7d/ATFXc+ZuGrK5YyHZFIh5ZAJM9HXTLJVVpZBumfUN7e86fQ/Fj+726jPvFn1YCf0HfoRLQIjZ1JSSz2GDfA82f4SGZ28ujc0VSQU8tKWD4WG3b28qKrCrtGBQykwdrbs+Vvx8W0Bm0tsaBG7OwcFOBhDkGSX935hcbR5zRuY1HtDWVs38qinh/UN0g7qje0Vk5ngvYY3xMvFrSt9SkoUi0gkZjjTVnBwFoqXI3GPcPE4h12UKr00Qb9d9/PZvEVO32aZiZpsf93b2CdV8UNiKBoNG/x1nNik4FJOQWNup8Phj3AFCeAGXIUow+52lyTNbcHkDGEWqPRB3fn/S/do8tNIg9KOa74n2XQHM8x7aTwJna1kooutNPU1zNuLLhuAs5+RGwLhvKKUYPIu85S/l5uYN98LHP/f6K0fCxUd4KxRt3n7G3YQUuFVIwDiLGnCaejgQ0XQFRGec2qGDcBja7KS74cLLMZfdWelMDFB591BHcIsLI0o2Envpi+bqhztIp2GbCmHAKN18cMftM5LJzH0IK7KclFPsloj+WmyrPOor9Mbz04345CDEuakFtz6sx9qBXZhGWGY//HWMIeyUYis0bESnDFr8zJw4j/eZ7/cz2VkgDauZPuHDfTYCS4GJ4QpNj0=
     on:
